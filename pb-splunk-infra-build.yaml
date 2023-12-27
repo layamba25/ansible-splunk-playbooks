@@ -30,7 +30,7 @@
   tasks:
     - name: Copy Splunk Indexers configuration file
       ansible.builtin.copy:
-        src: ./indexer_clustering/indexer_addon/
+        src: ./indexer_clustering/indexer_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
