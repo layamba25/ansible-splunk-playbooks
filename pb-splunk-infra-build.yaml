@@ -1,7 +1,7 @@
 ---
 - name: Configure Splunk Cluster Manager
   hosts: clustermanager
-  become: true
+  become: yes
   become_user: splunk_user
   become_method: sudo
 
