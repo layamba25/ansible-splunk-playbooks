@@ -15,8 +15,7 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      shell: |
-      sudo systemctl restart Splunkd
+      shell: sudo systemctl restart Splunkd
       # ansible.builtin.systemd:
       #   state: restarted
       #   name: Splunkd
