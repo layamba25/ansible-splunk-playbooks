@@ -1,7 +1,7 @@
 ---
 - name: Configure Splunk Cluster Manager
   hosts: clustermanager
-  become: yes
+  become: true
   become_user: splunk_user
 
   tasks:
@@ -17,12 +17,12 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
-      become: yes
+      # become: true
 
 # ---
 - name: Configure Splunk Indexers
   hosts: indexers
-  become: yes
+  become: true
   become_user: splunk_user
 
   tasks:
@@ -38,11 +38,11 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
-      become: yes
+      # become: true
 # ---
 - name: Configure Splunk Search Head
   hosts: searchhead
-  become: yes
+  become: true
   become_user: splunk_user
 
   tasks:
@@ -58,12 +58,12 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
-      become: yes
+      # become: true
 # ---
 # - name: Configure Splunk Search Head Cluster - Deployer
 #   hosts: deployer
 #
-#   become: yes
+#   become: true
 #   become_user: splunk_user
 
 #   tasks:
@@ -83,7 +83,7 @@
 # - name: Configure Splunk Search Head Cluster - Search Head
 #   hosts: searchhead
 #
-#   become: yes
+#   become: true
 #   become_user: splunk_user
 
 #   tasks:
