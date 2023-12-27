@@ -1,7 +1,6 @@
 ---
 - name: Configure Splunk Cluster Manager
   hosts: clustermanager
-  gather_facts: false
   become: yes
   become_user: splunk_user
 
@@ -23,7 +22,6 @@
 # ---
 - name: Configure Splunk Indexers
   hosts: indexers
-  gather_facts: false
   become: yes
   become_user: splunk_user
 
@@ -44,7 +42,6 @@
 # ---
 - name: Configure Splunk Search Head
   hosts: searchhead
-  gather_facts: false
   become: yes
   become_user: splunk_user
 
@@ -65,7 +62,7 @@
 # ---
 # - name: Configure Splunk Search Head Cluster - Deployer
 #   hosts: deployer
-#   gather_facts: false
+#
 #   become: yes
 #   become_user: splunk_user
 
@@ -85,7 +82,7 @@
 
 # - name: Configure Splunk Search Head Cluster - Search Head
 #   hosts: searchhead
-#   gather_facts: false
+#
 #   become: yes
 #   become_user: splunk_user
 
