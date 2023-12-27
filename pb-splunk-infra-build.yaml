@@ -8,7 +8,7 @@
   tasks:
     - name: Copy Splunk Cluster Manager configuration file
       ansible.builtin.copy:
-        src: ~/ansible-splunk-playbooks/indexer_clustering/cluster_addon
+        src: "~/ansible-splunk-playbooks/indexer_clustering/cluster_addon"
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
@@ -29,7 +29,7 @@
   tasks:
     - name: Copy Splunk Indexers configuration file
       ansible.builtin.copy:
-        src: ~/ansible-splunk-playbooks/indexer_clustering/indexers_addon
+        src: "~/ansible-splunk-playbooks/indexer_clustering/indexers_addon"
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
@@ -49,7 +49,7 @@
   tasks:
     - name: Copy Splunk Search Head configuration file
       ansible.builtin.copy:
-        src: ~/ansible-splunk-playbooks/indexer_clustering/indexers_addon
+        src: "~/ansible-splunk-playbooks/indexer_clustering/indexers_addon"
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
