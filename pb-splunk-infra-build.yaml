@@ -62,7 +62,7 @@
       systemd_service:
         state: restarted
         name: Splunkd
-# ---
+## ---
 # - name: Configure Splunk Search Head Cluster - Deployer
 #   hosts: deployer
 #
