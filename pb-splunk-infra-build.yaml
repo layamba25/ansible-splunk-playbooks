@@ -18,6 +18,7 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
+      become: yes
 
 # ---
 - name: Configure Splunk Indexers
@@ -39,6 +40,7 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
+      become: yes
 # ---
 - name: Configure Splunk Search Head
   hosts: searchhead
@@ -59,6 +61,7 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
+      become: yes
 # ---
 # - name: Configure Splunk Search Head Cluster - Deployer
 #   hosts: deployer
