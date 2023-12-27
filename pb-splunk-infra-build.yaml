@@ -15,9 +15,11 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd_service:
-        state: restarted
-        name: Splunkd
+      shell: |
+      sudo systemctl restart Splunkd
+      # ansible.builtin.systemd:
+      #   state: restarted
+      #   name: Splunkd
 
 # ---
 - name: Configure Splunk Indexers
