@@ -7,7 +7,7 @@
 
   tasks:
     - name: Copy Splunk Cluster Manager configuration file
-      ansible.builtin.copy:
+      copy:
         src: ./indexer_clustering/manager_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
@@ -15,7 +15,7 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd_service:
+      systemd_service:
         state: restarted
         name: Splunkd
       become: true
@@ -31,7 +31,7 @@
 
   tasks:
     - name: Copy Splunk Indexers configuration file
-      ansible.builtin.copy:
+      copy:
         src: ./indexer_clustering/indexers_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
@@ -39,7 +39,7 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd_service:
+      systemd_service:
         state: restarted
         name: Splunkd
 # ---
@@ -51,7 +51,7 @@
 
   tasks:
     - name: Copy Splunk Search Head configuration file
-      ansible.builtin.copy:
+      copy:
         src: ./indexer_clustering/indexers_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
@@ -59,7 +59,7 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd_service:
+      systemd_service:
         state: restarted
         name: Splunkd
 # ---
@@ -71,7 +71,7 @@
 
 #   tasks:
 #     - name: Copy Splunk Cluster configuration file
-#       ansible.builtin.copy:
+#       copy:
 #         src: ./searchhead_clustering/deployer_addon
 #         dest: /opt/splunk/etc/apps
 #         owner: splunk_user
@@ -79,7 +79,7 @@
 #         mode: "0644"
 
 #     - name: Restart Splunkd
-#       ansible.builtin.systemd_service:
+#       systemd_service:
 #         state: restarted
 #         name: Splunkd
 
@@ -91,7 +91,7 @@
 
 #   tasks:
 #     - name: Copy Splunk Cluster configuration file
-#       ansible.builtin.copy:
+#       copy:
 #         src: ./searchhead_clustering/searchhead_addon
 #         dest: /opt/splunk/etc/apps
 #         owner: splunk_user
@@ -99,7 +99,7 @@
 #         mode: "0644"
 
 #     - name: Restart Splunkd
-#       ansible.builtin.systemd_service:
+#       systemd_service:
 #         state: restarted
 #         name: Splunkd
 
