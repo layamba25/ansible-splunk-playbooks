@@ -31,7 +31,7 @@
     - name: Copy Splunk Indexers configuration file
       ansible.builtin.copy:
         src: ./indexer_clustering/indexer_addon/default/server.conf
-        dest: /opt/splunk/etc/system/local/server.conf
+        dest: /opt/splunk/etc/system/local/
         owner: splunk_user
         group: splunk_user
         mode: "0644"
