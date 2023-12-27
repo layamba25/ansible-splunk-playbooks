@@ -6,7 +6,7 @@ searchhead02.training.nilipay.com
 deployer.training.nilipay.com
 
 [clustermanager]
-clustermanger.training.nilipay.com
+clustermanager.training.nilipay.com
 
 [indexers]
 indexer0[1:3].training.nilipay.com
