@@ -37,9 +37,10 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd:
-        state: restarted
-        name: Splunkd
+      shell: sudo systemctl restart Splunkd
+      # ansible.builtin.systemd:
+      #   state: restarted
+      #   name: Splunkd
 # ---
 - name: Configure Splunk Search Head
   hosts: searchhead
@@ -57,9 +58,10 @@
         mode: "0644"
 
     - name: Restart Splunkd
-      ansible.builtin.systemd:
-        state: restarted
-        name: Splunkd
+      shell: sudo systemctl restart Splunkd
+      # ansible.builtin.systemd:
+      #   state: restarted
+      #   name: Splunkd
 # ---
 # - name: Configure Splunk Search Head Cluster - Deployer
 #   hosts: deployer
