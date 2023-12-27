@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: false
   become: yes
-  become_user: splunk_user
+  become_user: ubuntu
 
   tasks:
     - name: Ping host
