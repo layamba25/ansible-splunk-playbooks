@@ -59,53 +59,52 @@
       ansible.builtin.systemd:
         state: restarted
         name: Splunkd
-
 # ---
-- name: Configure Splunk Search Head Cluster - Deployer
-  hosts: deployer
-  gather_facts: false
-  become: yes
-  become_user: splunk_user
+# - name: Configure Splunk Search Head Cluster - Deployer
+#   hosts: deployer
+#   gather_facts: false
+#   become: yes
+#   become_user: splunk_user
 
-  tasks:
-    - name: Copy Splunk Cluster configuration file
-      ansible.builtin.copy:
-        src: ./searchhead_clustering/deployer_addon
-        dest: /opt/splunk/etc/apps
-        owner: splunk_user
-        group: splunk_user
-        mode: "0644"
+#   tasks:
+#     - name: Copy Splunk Cluster configuration file
+#       ansible.builtin.copy:
+#         src: ./searchhead_clustering/deployer_addon
+#         dest: /opt/splunk/etc/apps
+#         owner: splunk_user
+#         group: splunk_user
+#         mode: "0644"
 
-    - name: Restart Splunkd
-      ansible.builtin.systemd:
-        state: restarted
-        name: Splunkd
+#     - name: Restart Splunkd
+#       ansible.builtin.systemd:
+#         state: restarted
+#         name: Splunkd
 
-- name: Configure Splunk Search Head Cluster - Search Head
-  hosts: searchhead
-  gather_facts: false
-  become: yes
-  become_user: splunk_user
+# - name: Configure Splunk Search Head Cluster - Search Head
+#   hosts: searchhead
+#   gather_facts: false
+#   become: yes
+#   become_user: splunk_user
 
-  tasks:
-    - name: Copy Splunk Cluster configuration file
-      ansible.builtin.copy:
-        src: ./searchhead_clustering/searchhead_addon
-        dest: /opt/splunk/etc/apps
-        owner: splunk_user
-        group: splunk_user
-        mode: "0644"
+#   tasks:
+#     - name: Copy Splunk Cluster configuration file
+#       ansible.builtin.copy:
+#         src: ./searchhead_clustering/searchhead_addon
+#         dest: /opt/splunk/etc/apps
+#         owner: splunk_user
+#         group: splunk_user
+#         mode: "0644"
 
-    - name: Restart Splunkd
-      ansible.builtin.systemd:
-        state: restarted
-        name: Splunkd
-    # Wait for Splunkd to restart and run only on the first host
-    - name: Wait for Splunkd to restart
-      wait_for:
-        port: 8000
-        delay: 10
-        timeout: 300
-      shell: |
-        /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchhead'] | join(',') }}" -auth admin:P@ssword123
-      delegate_to: "{{ groups['searchhead'][0] }}"
+#     - name: Restart Splunkd
+#       ansible.builtin.systemd:
+#         state: restarted
+#         name: Splunkd
+
+#     - name: Wait for Splunkd to restart
+#       wait_for:
+#         port: 8000
+#         delay: 10
+#         timeout: 300
+#       shell: |
+#         /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchhead'] | join(',') }}" -auth admin:P@ssword123
+#       delegate_to: "{{ groups['searchhead'][0] }}"
