@@ -194,7 +194,7 @@
 
 ## Deploy Outputs to Univesal Forwarder - Deployment Server
 - name: Deploy Outputs to Univesal Forwarder - Deployment Server
-  hosts: deployer
+  hosts: deploymentserver
   become: yes
   become_user: splunk_user
 
