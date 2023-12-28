@@ -188,7 +188,7 @@
       replace:
         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/default/deploymentclient.conf
         regexp: "targetUri = .*"
-        replace: "targetUri = {{ groups['deployer'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
+        replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
 

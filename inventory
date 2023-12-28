@@ -17,6 +17,8 @@ deploymentserver.training.nilipay.com
 [universalforwarder]
 linuxuniversalforwarder.training.nilipay.com
 
-
 [license-server]
 license-server.training.nilipay.com
+
+[heavyforwarder]
+heavyforwarder.training.nilipay.com
