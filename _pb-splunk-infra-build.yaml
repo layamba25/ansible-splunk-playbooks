@@ -122,6 +122,14 @@
       # run only on the second search head
       when: inventory_hostname == groups['searchheads'][1]
 
+    - name: Enable web.conf SSL on all SHs - Search Heads
+      copy:
+        src: ./searchhead_clustering/web_ssl_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
@@ -138,17 +146,6 @@
 
       # run only on the first search head
       when: inventory_hostname == groups['searchheads'][0]
-
-    - name: Enable web.conf SSL on all SHs - Search Heads
-      copy:
-        src: ./searchhead_clustering/web_ssl_addon
-        dest: /opt/splunk/etc/apps
-        owner: splunk_user
-        group: splunk_user
-        mode: 0644
-
-    - name: Restart Splunk
-      shell: sudo systemctl restart Splunkd
 
 ### Search Head Cluster Deployer Push
 - name: Deploy Outputs to Search Heads - Deployer
