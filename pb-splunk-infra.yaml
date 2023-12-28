@@ -20,3 +20,39 @@
       # ansible.builtin.systemd:
       #   state: restarted
       #   name: Splunkd
+
+- name: Configure Splunk Infrastructure - Indexers
+  hosts: indexers
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Config to Indexers
+      copy:
+        src: ./indexer_clustering/indexer_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+- name: Configure Splunk Infrastructure - Search Heads
+  hosts: searchheads
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Config to Search Heads
+      copy:
+        src: ./indexer_clustering/searchheads_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
