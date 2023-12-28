@@ -1,0 +1,47 @@
+---
+- name: Configure Splunk Infrastructure
+  hosts: deployer
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy SH Cluster Config - Deployer
+      copy:
+        src: ./searchhead_clustering/deployer_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+- name: Configure Splunk Infrastructure - Search Heads
+  hosts: searchheads
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy SH Cluster Config - Search Heads
+      copy:
+        src: ./searchhead_clustering/sh01_cluster_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0]
+
+    - name: Copy SH Cluster Config - Search Heads
+      copy:
+        src: ./searchhead_clustering/sh02_cluster_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      # run only on the second search head
+      when: inventory_hostname == groups['searchheads'][1]
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
