@@ -48,7 +48,7 @@
   tasks:
     - name: Copy Config to Search Heads
       copy:
-        src: ./indexer_clustering/searchheads_addon
+        src: ./indexer_clustering/searchhead_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
