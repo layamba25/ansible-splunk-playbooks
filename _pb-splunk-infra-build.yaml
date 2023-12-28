@@ -168,8 +168,8 @@
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
 
-    - name: Push SH Cluster Config
-      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
+    # - name: Push SH Cluster Config
+    #   shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
 
 ## Configure Universal Forwarders
 - name: Configure Universal Forwarders
@@ -226,7 +226,7 @@
 
 ## Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
 - name: Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
-  hosts: all:!indexers:!searchheads:!universalforwarder
+  hosts: all:!indexers:!universalforwarder #:!searchheads
   become: yes
   become_user: splunk_user
 
