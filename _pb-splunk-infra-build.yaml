@@ -161,7 +161,7 @@
         replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Push SH Cluster Config
-      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123
+      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
 
 ## Configure Universal Forwarders
 - name: Configure Universal Forwarders
@@ -215,3 +215,35 @@
 
     - name: Apply Deployment Server Bundle Push
       shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
+
+## Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
+- name: Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
+  hosts: all
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Outputs Config - All Server
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      excluding:
+        - indexers
+        - searchheads
+        - universalforwarder
+
+    - name: Modify outputs.conf to include all indexers, find and replace server =
+      replace:
+        path: /opt/splunk/etc/apps/outputs_addon/default/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
+      excluding:
+        - indexers
+        - searchheads
+        - universalforwarder
+
+    - name: Restart Splunkd
+      shell: sudo systemctl restart Splunkd
