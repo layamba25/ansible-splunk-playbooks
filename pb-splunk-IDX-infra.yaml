@@ -1,3 +1,4 @@
+## Indexer Cluster Configuration
 ---
 - name: Configure Splunk Infrastructure
   hosts: clustermanager
@@ -56,3 +57,22 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
+
+### Cluster Manager manager-apps directory Deployment
+- name: Configure Splunk Infrastructure
+  hosts: clustermanager
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Inputs Config to Cluster Manager manager-apps directory
+      copy:
+        src: ./indexer_clustering/idx_inputs_addon
+        dest: /opt/splunk/etc/manager-apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Apply Cluster Bundle Push
+      shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123

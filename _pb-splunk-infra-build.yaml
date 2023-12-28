@@ -1,0 +1,184 @@
+## Indexer Cluster Configuration
+---
+- name: Configure Splunk Infrastructure
+  hosts: clustermanager
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Cluster Manager Config
+      copy:
+        src: ./indexer_clustering/cluster_manager_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+      # ansible.builtin.systemd:
+      #   state: restarted
+      #   name: Splunkd
+
+- name: Configure Splunk Infrastructure - Indexers
+  hosts: indexers
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Config to Indexers
+      copy:
+        src: ./indexer_clustering/indexer_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+- name: Configure Splunk Infrastructure - Search Heads
+  hosts: searchheads
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Config to Search Heads
+      copy:
+        src: ./indexer_clustering/searchhead_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+### Cluster Manager manager-apps directory Deployment
+- name: Configure Splunk Infrastructure
+  hosts: clustermanager
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Inputs Config to Cluster Manager manager-apps directory
+      copy:
+        src: ./indexer_clustering/idx_inputs_addon
+        dest: /opt/splunk/etc/manager-apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Apply Cluster Bundle Push
+      shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123
+
+### Search Head Cluster Configuration
+- name: Configure Splunk Infrastructure
+  hosts: deployer
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy SH Cluster Config - Deployer
+      copy:
+        src: ./searchhead_clustering/deployer_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+- name: Configure Splunk Infrastructure - Search Heads
+  hosts: searchheads
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy SH Cluster Config - Search Heads
+      copy:
+        src: ./searchhead_clustering/sh01_cluster_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0]
+
+    - name: Copy SH Cluster Config - Search Heads
+      copy:
+        src: ./searchhead_clustering/sh02_cluster_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      # run only on the second search head
+      when: inventory_hostname == groups['searchheads'][1]
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+    - name: Wait for Splunk to restart
+      wait_for:
+        port: 8000
+        delay: 10
+        timeout: 300
+
+    - name: Assign SH Cluster Captain
+      # get the list of search heads from the inventory and join them with a comma
+      # this will be the list of search heads to join the cluster
+      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
+
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0]
+
+### Search Head Cluster Deployer Push
+- name: Deploy Outputs to Search Heads - Deployer
+  hosts: deployer
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy SH Cluster Config - Deployer
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/shcluster/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Push SH Cluster Config
+      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123
+
+## Deploy Outputs to Univesal Forwarder - Deployment Server
+- name: Deploy Outputs to Univesal Forwarder - Deployment Server
+  hosts: deployer
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy ServerClass Config - Deployment Server
+      copy:
+        src: ./serverclass_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Copy Outputs Config - Deployment Server deployment-apps directory
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/deployment-apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+
+    - name: Apply Deployment Server Bundle Push
+      shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
