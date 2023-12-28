@@ -18,7 +18,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
       # ansible.builtin.systemd:
       #   state: restarted
@@ -42,7 +42,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
 - name: Configure Splunk Infrastructure - Search Heads
   hosts: searchheads
@@ -62,7 +62,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
 ### Cluster Manager manager-apps directory Deployment
 - name: Configure Splunk Infrastructure
@@ -83,7 +83,7 @@
 
     - name: Apply Cluster Bundle Push
       shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
 ### Search Head Cluster Configuration
 - name: Configure Splunk Infrastructure
@@ -104,7 +104,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
 - name: Configure Splunk Infrastructure - Search Heads
   hosts: searchheads
@@ -145,7 +145,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed or replace_task.changed
+      when: copy_task.changed
 
     - name: Wait for Splunk to restart
       wait_for:
