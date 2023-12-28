@@ -166,7 +166,7 @@
       replace:
         path: /opt/splunk/etc/shcluster/apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
-        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
     # - name: Push SH Cluster Config
     #   shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
@@ -219,7 +219,7 @@
       replace:
         path: /opt/splunk/etc/deployment-apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
-        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Apply Deployment Server Bundle Push
       shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
@@ -243,7 +243,7 @@
       replace:
         path: /opt/splunk/etc/apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
-        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Restart Splunkd
       shell: sudo systemctl restart Splunkd
