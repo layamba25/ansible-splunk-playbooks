@@ -154,8 +154,35 @@
         group: splunk_user
         mode: 0644
 
+    - name: Modify outputs.conf to include all indexers, find and replace server =
+      replace:
+        path: /opt/splunk/etc/shcluster/apps/outputs_addon/default/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
+
     - name: Push SH Cluster Config
       shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123
+
+## Configure Universal Forwarders
+- name: Configure Universal Forwarders
+  hosts: universalforwarder
+  become: yes
+  become_user: splunk_user
+  tasks:
+    - name: Copy ServerClass Config - Deployment Server
+      copy:
+        src: ./TA_deploymentclient
+        dest: /opt/splunkforwarder/etc/apps
+        # owner: splunk_user
+        # group: splunk_user
+        # mode: 0644
+    - name: Modify deploymentclient to include the deployment server, find and replace targetUri =
+      replace:
+        path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/default/deploymentclient.conf
+        regexp: "targetUri = .*"
+        replace: "targetUri = {{ groups['deployer'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
+    - name: Restart Splunk
+      shell: /opt/splunkforwarder/bin/splunk restart
 
 ## Deploy Outputs to Univesal Forwarder - Deployment Server
 - name: Deploy Outputs to Univesal Forwarder - Deployment Server
@@ -179,6 +206,12 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
+
+    - name: Modify outputs.conf to include all indexers, find and replace server =
+      replace:
+        path: /opt/splunk/etc/deployment-apps/outputs_addon/default/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Apply Deployment Server Bundle Push
       shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
