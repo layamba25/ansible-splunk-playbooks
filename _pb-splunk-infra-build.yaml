@@ -218,7 +218,7 @@
 
 ## Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
 - name: Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
-  hosts: all
+  hosts: all:!indexers:!searchheads:!universalforwarder
   become: yes
   become_user: splunk_user
 
@@ -230,20 +230,12 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      excluding:
-        - indexers
-        - searchheads
-        - universalforwarder
 
     - name: Modify outputs.conf to include all indexers, find and replace server =
       replace:
         path: /opt/splunk/etc/apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':9997') | join(',') }}"
-      excluding:
-        - indexers
-        - searchheads
-        - universalforwarder
 
     - name: Restart Splunkd
       shell: sudo systemctl restart Splunkd
