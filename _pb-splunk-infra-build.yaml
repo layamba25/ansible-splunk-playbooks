@@ -147,6 +147,9 @@
         group: splunk_user
         mode: 0644
 
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
 ### Search Head Cluster Deployer Push
 - name: Deploy Outputs to Search Heads - Deployer
   hosts: deployer
