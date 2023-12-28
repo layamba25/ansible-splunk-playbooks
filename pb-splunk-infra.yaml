@@ -13,3 +13,8 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
+
+    - name: Restart Splunk
+      ansible.builtin.systemd_service:
+        state: restarted
+        name: Splunkd
