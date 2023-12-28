@@ -1,0 +1,15 @@
+---
+- name: Configure Splunk Infrastructure
+  hosts: clustermanager
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Copy Cluster Manager Config
+      copy:
+        src: ./indexer_clustering/cluster_manager_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
