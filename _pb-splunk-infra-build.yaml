@@ -1,6 +1,6 @@
 ## Indexer Cluster Configuration
 ---
-- name: Configure Splunk Infrastructure
+- name: Configure Splunk Infrastructure - Cluster Manager
   hosts: clustermanager
   gather_facts: false
   become: yes
@@ -14,15 +14,9 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed
-
-      # ansible.builtin.systemd:
-      #   state: restarted
-      #   name: Splunkd
 
 - name: Configure Splunk Infrastructure - Indexers
   hosts: indexers
@@ -33,14 +27,13 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
-    - name: Copy Config to Indexers
+    - name: Copy Indexers Configs
       copy:
         src: ./indexer_clustering/indexer_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Set manager_uri in server.conf
       lineinfile:
@@ -57,7 +50,6 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed
 
 - name: Configure Splunk Infrastructure - Search Heads
   hosts: searchheads
@@ -68,14 +60,13 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
-    - name: Copy Config to Search Heads
+    - name: Copy Search Heads Configs
       copy:
         src: ./indexer_clustering/searchhead_addon
         dest: /opt/splunk/etc/apps
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Set manager_uri in server.conf
       lineinfile:
@@ -85,7 +76,6 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed
 
 ### Cluster Manager manager-apps directory Deployment
 - name: Configure Splunk Infrastructure
@@ -102,14 +92,12 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Apply Cluster Bundle Push
       shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123
-      when: copy_task.changed
 
 ### Search Head Cluster Configuration
-- name: Configure Splunk Infrastructure
+- name: Configure Splunk Infrastructure - Search Head Cluster Deployer
   hosts: deployer
   gather_facts: false
   become: yes
@@ -123,11 +111,9 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed
 
 - name: Copy SH Cluster Config to the Search Heads
   hosts: searchheads
@@ -146,7 +132,6 @@
         mode: 0644
       # run only on the first search head
       # when: inventory_hostname == groups['searchheads'][0]
-      register: copy_task
 
     - name: Set mgmt_uri in server.conf
       lineinfile:
@@ -177,7 +162,6 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-      when: copy_task.changed
 
     - name: Wait for Splunk to restart
       wait_for:
@@ -200,23 +184,23 @@
       shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
 
-    - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
+    - name: Start Splunk on all SHs after Clean Raft
       shell: sudo systemctl start Splunkd
       when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
 
-    - name: Assign SH Cluster Captain
+    - name: Assign SH Cluster Captain after Clean Raft
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
       # run only on the first search head
       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
 
 ### Search Head Cluster Deployer Push
-- name: Deploy Outputs to Search Heads - From Deployer
+- name: Deploy Outputs Configs to Search Heads - From Deployer
   hosts: deployer
   become: yes
   become_user: splunk_user
 
   tasks:
-    - name: Copy SH Cluster Config - Deployer
+    - name: Copy Outputs Config to Deployer SHCLUSTER/APPS
       copy:
         src: ./outputs_addon
         dest: /opt/splunk/etc/shcluster/apps
@@ -224,13 +208,13 @@
         group: splunk_user
         mode: 0644
 
-    - name: Modify outputs.conf to include all indexers, find and replace server =
+    - name: Modify outputs.conf to include all indexers
       replace:
         path: /opt/splunk/etc/shcluster/apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
-    - name: Push SH Cluster Config
+    - name: Push Outputs Cluster Config to Search Heads
       shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
       ignore_errors: yes
 
@@ -240,14 +224,15 @@
   become: yes
   become_user: splunk_user
   tasks:
-    - name: Copy ServerClass Config - Deployment Server
+    - name: Copy DeploymentClient Config to Universal Forwarder
       copy:
         src: ./TA_deploymentclient
         dest: /opt/splunkforwarder/etc/apps
         owner: splunk_user
         group: splunk_user
         mode: 0644
-    - name: Modify deploymentclient to include the deployment server, find and replace targetUri =
+
+    - name: Modify deploymentclient to include the Deployment Server
       replace:
         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/default/deploymentclient.conf
         regexp: "targetUri = .*"
@@ -264,7 +249,7 @@
       shell: /opt/splunkforwarder/bin/splunk restart
 
 ## Deploy Outputs to Univesal Forwarder - Deployment Server
-- name: Deploy Outputs to Univesal Forwarder - Deployment Server
+- name: Deploy Outputs to Univesal Forwarder - From Deployment Server DEPLOYMENT-APPS directory
   hosts: deploymentserver
   become: yes
   become_user: splunk_user
@@ -286,7 +271,7 @@
         group: splunk_user
         mode: 0644
 
-    - name: Modify outputs.conf to include all indexers, find and replace server =
+    - name: Modify outputs.conf to include all indexers
       replace:
         path: /opt/splunk/etc/deployment-apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
@@ -302,7 +287,7 @@
   become_user: splunk_user
 
   tasks:
-    - name: Copy Outputs Config - All Server
+    - name: Copy Outputs Config - To all Server
       copy:
         src: ./outputs_addon
         dest: /opt/splunk/etc/apps
@@ -310,7 +295,7 @@
         group: splunk_user
         mode: 0644
 
-    - name: Modify outputs.conf to include all indexers, find and replace server =
+    - name: Modify outputs.conf to include all indexers
       replace:
         path: /opt/splunk/etc/apps/outputs_addon/default/outputs.conf
         regexp: "server = .*"
