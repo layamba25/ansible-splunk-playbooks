@@ -79,7 +79,7 @@
 
     - name: Set manager_uri in server.conf
       lineinfile:
-        path: /opt/splunk/etc/apps/searchhead_addon/local/server.conf
+        path: /opt/splunk/etc/apps/searchhead_addon/default/server.conf
         regexp: '^manager_uri\s*=.*$'
         line: "manager_uri = https://{{ clustermanager }}:8089"
 
