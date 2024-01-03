@@ -186,12 +186,26 @@
         timeout: 300
 
     - name: Assign SH Cluster Captain
-      # get the list of search heads from the inventory and join them with a comma
-      # this will be the list of search heads to join the cluster
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
-
       # run only on the first search head
       when: inventory_hostname == groups['searchheads'][0]
+      register: bootstrap_task
+
+    - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
+      shell: sudo systemctl stop Splunkd
+      when: bootstrap_task.failed
+
+    - name: If Assign SH Cluster Captain Fails, do a clean raft
+      shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123
+      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task.failed
+
+    - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
+      shell: sudo systemctl start Splunkd
+
+    - name: Assign SH Cluster Captain
+      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task.failed
 
 ### Search Head Cluster Deployer Push
 - name: Deploy Outputs to Search Heads - Deployer
