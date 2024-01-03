@@ -133,7 +133,7 @@
 
     - name: Set conf_deploy_fetch_url in server.conf
       lineinfile:
-        path: /path/to/server.conf
+        path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^conf_deploy_fetch_url\s*=.*$'
         line: "conf_deploy_fetch_url = https://{{ deployer }}:8089"
 
