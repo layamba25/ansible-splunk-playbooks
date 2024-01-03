@@ -197,7 +197,7 @@
       when: bootstrap_task is failed
 
     - name: If Assign SH Cluster Captain Fails, do a clean raft
-      shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123
+      shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
 
     - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
