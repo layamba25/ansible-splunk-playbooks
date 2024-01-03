@@ -210,7 +210,7 @@
       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
 
 ### Search Head Cluster Deployer Push
-- name: Deploy Outputs to Search Heads - Deployer
+- name: Deploy Outputs to Search Heads - From Deployer
   hosts: deployer
   become: yes
   become_user: splunk_user
@@ -230,8 +230,9 @@
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
-    # - name: Push SH Cluster Config
-    #   shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
+    - name: Push SH Cluster Config
+      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
+      ignore_errors: yes
 
 ## Configure Universal Forwarders
 - name: Configure Universal Forwarders
