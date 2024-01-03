@@ -191,7 +191,7 @@
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
 
       # run only on the first search head
-      when: inventory_hostname == groups['searchheads'][0] and copy_task.changed
+      when: inventory_hostname == groups['searchheads'][0]
 
 ### Search Head Cluster Deployer Push
 - name: Deploy Outputs to Search Heads - Deployer
