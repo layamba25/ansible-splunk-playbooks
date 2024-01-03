@@ -29,6 +29,8 @@
   gather_facts: false
   become: yes
   become_user: splunk_user
+  vars:
+    clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
     - name: Copy Config to Indexers
@@ -40,6 +42,19 @@
         mode: 0644
       register: copy_task
 
+    - name: Set manager_uri in server.conf
+      lineinfile:
+        path: /opt/splunk/etc/apps/indexer_addon/local/server.conf
+        regexp: '^manager_uri\s*=.*$'
+        line: "manager_uri = https://{{ clustermanager }}:8089"
+
+    - name: Ensure splunk_user owns /opt/splunk/ directory
+      file:
+        path: /opt/splunk/
+        owner: splunk_user
+        group: splunk_user
+        recurse: yes
+
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
       when: copy_task.changed
@@ -49,6 +64,8 @@
   gather_facts: false
   become: yes
   become_user: splunk_user
+  vars:
+    clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
     - name: Copy Config to Search Heads
@@ -59,6 +76,12 @@
         group: splunk_user
         mode: 0644
       register: copy_task
+
+    - name: Set manager_uri in server.conf
+      lineinfile:
+        path: /opt/splunk/etc/apps/searchhead_addon/local/server.conf
+        regexp: '^manager_uri\s*=.*$'
+        line: "manager_uri = https://{{ clustermanager }}:8089"
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
