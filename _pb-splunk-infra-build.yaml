@@ -204,14 +204,21 @@
       copy:
         src: ./TA_deploymentclient
         dest: /opt/splunkforwarder/etc/apps
-        # owner: splunk_user
-        # group: splunk_user
-        # mode: 0644
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
     - name: Modify deploymentclient to include the deployment server, find and replace targetUri =
       replace:
         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/default/deploymentclient.conf
         regexp: "targetUri = .*"
         replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
+
+    - name: Ensure splunk_user owns mgmt_uri file
+      file:
+        path: /opt/splunkforwarder/
+        owner: splunk_user
+        group: splunk_user
+
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
 
