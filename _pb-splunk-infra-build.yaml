@@ -111,8 +111,7 @@
   become: yes
   become_user: splunk_user
   vars:
-    hostsvars:
-      deployer: "{{ hostvars['deployer']['ansible_facts']['hostname'] }}"
+    deployer: "{{ groups['deployer'][0] }}"
 
   tasks:
     - name: Copy SH Cluster Config - Search Heads
@@ -130,7 +129,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^mgmt_uri\s*=.*$'
-        line: "mgmt_uri = https://{{ ansible_facts['hostname'] }}:8089"
+        line: "mgmt_uri = https://{{ deployer }}:8089"
 
     - name: Set conf_deploy_fetch_url in server.conf
       lineinfile:
