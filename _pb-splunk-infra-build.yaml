@@ -137,11 +137,12 @@
         regexp: '^conf_deploy_fetch_url\s*=.*$'
         line: "conf_deploy_fetch_url = https://{{ deployer }}:8089"
 
-    - name: Ensure splunk_user owns mgmt_uri file
+    - name: Ensure splunk_user owns /opt/splunk/ directory
       file:
         path: /opt/splunk/
         owner: splunk_user
         group: splunk_user
+        recurse: yes
 
     - name: Enable web.conf SSL on all SHs - Search Heads
       copy:
@@ -150,7 +151,6 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      register: copy_task
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
@@ -218,6 +218,7 @@
         path: /opt/splunkforwarder/
         owner: splunk_user
         group: splunk_user
+        recurse: yes
 
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
