@@ -152,7 +152,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^mgmt_uri\s*=.*$'
-        line: "mgmt_uri = https://{{ ansible_facts['fqdn'] }}:8089"
+        line: "mgmt_uri = https://{{ inventory_hostname }}:8089"
 
     - name: Set conf_deploy_fetch_url in server.conf
       lineinfile:
@@ -236,12 +236,12 @@
         regexp: "targetUri = .*"
         replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
 
-    - name: Ensure splunk_user owns mgmt_uri file
-      file:
-        path: /opt/splunkforwarder/
-        owner: splunk_user
-        group: splunk_user
-        recurse: yes
+    # - name: Ensure splunk_user owns /opt/splunkforwarder/ directory
+    #   file:
+    #     path: /opt/splunkforwarder/
+    #     owner: splunk_user
+    #     group: splunk_user
+    #     recurse: yes
 
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
