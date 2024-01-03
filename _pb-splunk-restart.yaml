@@ -1,0 +1,21 @@
+## Indexer Cluster Configuration
+---
+- name: Restart all Splunk instances
+  hosts: all
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+      register: restart_task
+      when: inventory_hostname not in groups['universalforwarder']
+
+    - name: Wait for Splunk to restart
+      wait_for:
+        host: localhost
+        port: 8089
+        delay: 10
+        timeout: 300
+      when: restart_task.changed
