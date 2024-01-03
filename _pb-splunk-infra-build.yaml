@@ -130,13 +130,13 @@
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^mgmt_uri\s*=.*$'
-        line: "mgmt_uri = https:// {{ ansible_facts['hostname'] }} :8089"
+        line: "mgmt_uri = https://{{ ansible_facts['hostname'] }}:8089"
 
     - name: Set conf_deploy_fetch_url in server.conf
       lineinfile:
         path: /path/to/server.conf
         regexp: '^conf_deploy_fetch_url\s*=.*$'
-        line: "conf_deploy_fetch_url = https:// {{ hostvars['deployer']['ansible_facts']['hostname'] }} :8089"
+        line: "conf_deploy_fetch_url = https://{{ hostvars['deployer']['ansible_facts']['hostname'] }}:8089"
 
     - name: Ensure splunk_user owns mgmt_uri file
       file:
