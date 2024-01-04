@@ -76,247 +76,247 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
-# ### Cluster Manager manager-apps directory Deployment
-# - name: Configure Splunk Infrastructure
-#   hosts: clustermanager
-#   gather_facts: false
-#   become: yes
-#   become_user: splunk_user
+### Cluster Manager manager-apps directory Deployment
+- name: Configure Splunk Infrastructure
+  hosts: clustermanager
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Copy Inputs Config to Cluster Manager manager-apps directory
-#       copy:
-#         src: ./indexer_clustering/idx_inputs_addon
-#         dest: /opt/splunk/etc/manager-apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+  tasks:
+    - name: Copy Inputs Config to Cluster Manager manager-apps directory
+      copy:
+        src: ./indexer_clustering/idx_inputs_addon
+        dest: /opt/splunk/etc/manager-apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Apply Cluster Bundle Push
-#       shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123
+    - name: Apply Cluster Bundle Push
+      shell: /opt/splunk/bin/splunk apply cluster-bundle -auth admin:P@ssword123
 
-# ### Search Head Cluster Configuration
-# - name: Configure Splunk Infrastructure - Search Head Cluster Deployer
-#   hosts: deployer
-#   gather_facts: false
-#   become: yes
-#   become_user: splunk_user
+### Search Head Cluster Configuration
+- name: Configure Splunk Infrastructure - Search Head Cluster Deployer
+  hosts: deployer
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Copy SH Cluster Config to the Deployer
-#       copy:
-#         src: ./searchhead_clustering/deployer_addon
-#         dest: /opt/splunk/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+  tasks:
+    - name: Copy SH Cluster Config to the Deployer
+      copy:
+        src: ./searchhead_clustering/deployer_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Restart Splunk
-#       shell: sudo systemctl restart Splunkd
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
 
-# - name: Copy SH Cluster Config to the Search Heads
-#   hosts: searchheads
-#   become: yes
-#   become_user: splunk_user
-#   vars:
-#     deployer: "{{ groups['deployer'][0] }}"
+- name: Copy SH Cluster Config to the Search Heads
+  hosts: searchheads
+  become: yes
+  become_user: splunk_user
+  vars:
+    deployer: "{{ groups['deployer'][0] }}"
 
-#   tasks:
-#     - name: Copy SH Cluster Config - Search Heads
-#       copy:
-#         src: ./searchhead_clustering/sh_cluster_addon
-#         dest: /opt/splunk/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
-#       # run only on the first search head
-#       # when: inventory_hostname == groups['searchheads'][0]
+  tasks:
+    - name: Copy SH Cluster Config - Search Heads
+      copy:
+        src: ./searchhead_clustering/sh_cluster_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
+      # run only on the first search head
+      # when: inventory_hostname == groups['searchheads'][0]
 
-#     - name: Set mgmt_uri in server.conf
-#       lineinfile:
-#         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
-#         regexp: '^mgmt_uri\s*=.*$'
-#         line: "mgmt_uri = https://{{ inventory_hostname }}:8089"
+    - name: Set mgmt_uri in server.conf
+      lineinfile:
+        path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
+        regexp: '^mgmt_uri\s*=.*$'
+        line: "mgmt_uri = https://{{ inventory_hostname }}:8089"
 
-#     - name: Set conf_deploy_fetch_url in server.conf
-#       lineinfile:
-#         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
-#         regexp: '^conf_deploy_fetch_url\s*=.*$'
-#         line: "conf_deploy_fetch_url = https://{{ deployer }}:8089"
+    - name: Set conf_deploy_fetch_url in server.conf
+      lineinfile:
+        path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
+        regexp: '^conf_deploy_fetch_url\s*=.*$'
+        line: "conf_deploy_fetch_url = https://{{ deployer }}:8089"
 
-#     - name: Ensure splunk_user owns /opt/splunk/ directory
-#       file:
-#         path: /opt/splunk/
-#         owner: splunk_user
-#         group: splunk_user
-#         recurse: yes
+    - name: Ensure splunk_user owns /opt/splunk/ directory
+      file:
+        path: /opt/splunk/
+        owner: splunk_user
+        group: splunk_user
+        recurse: yes
 
-#     - name: Enable web.conf SSL on all SHs - Search Heads
-#       copy:
-#         src: ./searchhead_clustering/web_ssl_addon
-#         dest: /opt/splunk/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+    - name: Enable web.conf SSL on all SHs - Search Heads
+      copy:
+        src: ./searchhead_clustering/web_ssl_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Restart Splunk
-#       shell: sudo systemctl restart Splunkd
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
 
-#     - name: Wait for Splunk to restart
-#       wait_for:
-#         port: 8000
-#         delay: 10
-#         timeout: 300
+    - name: Wait for Splunk to restart
+      wait_for:
+        port: 8000
+        delay: 10
+        timeout: 300
 
-#     - name: Assign SH Cluster Captain
-#       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
-#       # run only on the first search head
-#       when: inventory_hostname == groups['searchheads'][0]
-#       register: bootstrap_task
-#       ignore_errors: yes
+    - name: Assign SH Cluster Captain
+      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0]
+      register: bootstrap_task
+      ignore_errors: yes
 
-#     - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
-#       shell: sudo systemctl stop Splunkd
-#       when: bootstrap_task is failed
+    - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
+      shell: sudo systemctl stop Splunkd
+      when: bootstrap_task is failed
 
-#     - name: If Assign SH Cluster Captain Fails, do a clean raft
-#       shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
-#       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
+    - name: If Assign SH Cluster Captain Fails, do a clean raft
+      shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
+      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
 
-#     - name: Start Splunk on all SHs after Clean Raft
-#       shell: sudo systemctl start Splunkd
-#       when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
+    - name: Start Splunk on all SHs after Clean Raft
+      shell: sudo systemctl start Splunkd
+      when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
 
-#     - name: Assign SH Cluster Captain after Clean Raft
-#       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
-#       # run only on the first search head
-#       when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
-#       ignore_errors: yes
+    - name: Assign SH Cluster Captain after Clean Raft
+      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
+      # run only on the first search head
+      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
+      ignore_errors: yes
 
-# ### Search Head Cluster Deployer Push
-# - name: Deploy Outputs Configs to Search Heads - From Deployer
-#   hosts: deployer
-#   become: yes
-#   become_user: splunk_user
+### Search Head Cluster Deployer Push
+- name: Deploy Outputs Configs to Search Heads - From Deployer
+  hosts: deployer
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Copy Outputs Config to Deployer SHCLUSTER/APPS
-#       copy:
-#         src: ./outputs_addon
-#         dest: /opt/splunk/etc/shcluster/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+  tasks:
+    - name: Copy Outputs Config to Deployer SHCLUSTER/APPS
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/shcluster/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Modify outputs.conf to include all indexers
-#       replace:
-#         path: /opt/splunk/etc/shcluster/apps/outputs_addon/local/outputs.conf
-#         regexp: "server = .*"
-#         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+    - name: Modify outputs.conf to include all indexers
+      replace:
+        path: /opt/splunk/etc/shcluster/apps/outputs_addon/local/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
-#     - name: Push Outputs Cluster Config to Search Heads
-#       shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
-#       ignore_errors: yes
+    - name: Push Outputs Cluster Config to Search Heads
+      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ groups['searchheads'][0] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
+      ignore_errors: yes
 
-# ## Configure Universal Forwarders
-# - name: Configure Universal Forwarders
-#   hosts: universalforwarder
-#   become: yes
-#   become_user: splunk_user
-#   tasks:
-#     - name: Copy DeploymentClient Config to Universal Forwarder
-#       copy:
-#         src: ./TA_deploymentclient
-#         dest: /opt/splunkforwarder/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+## Configure Universal Forwarders
+- name: Configure Universal Forwarders
+  hosts: universalforwarder
+  become: yes
+  become_user: splunk_user
+  tasks:
+    - name: Copy DeploymentClient Config to Universal Forwarder
+      copy:
+        src: ./TA_deploymentclient
+        dest: /opt/splunkforwarder/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Modify deploymentclient to include the Deployment Server
-#       replace:
-#         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/local/deploymentclient.conf
-#         regexp: "targetUri = .*"
-#         replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
+    - name: Modify deploymentclient to include the Deployment Server
+      replace:
+        path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/local/deploymentclient.conf
+        regexp: "targetUri = .*"
+        replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
 
-#     # - name: Ensure splunk_user owns /opt/splunkforwarder/ directory
-#     #   file:
-#     #     path: /opt/splunkforwarder/
-#     #     owner: splunk_user
-#     #     group: splunk_user
-#     #     recurse: yes
+    # - name: Ensure splunk_user owns /opt/splunkforwarder/ directory
+    #   file:
+    #     path: /opt/splunkforwarder/
+    #     owner: splunk_user
+    #     group: splunk_user
+    #     recurse: yes
 
-#     - name: Restart Splunk
-#       shell: /opt/splunkforwarder/bin/splunk restart
+    - name: Restart Splunk
+      shell: /opt/splunkforwarder/bin/splunk restart
 
-# ## Deploy Outputs to Univesal Forwarder - Deployment Server
-# - name: Deploy Outputs to Univesal Forwarder - From Deployment Server DEPLOYMENT-APPS directory
-#   hosts: deploymentserver
-#   become: yes
-#   become_user: splunk_user
+## Deploy Outputs to Univesal Forwarder - Deployment Server
+- name: Deploy Outputs to Univesal Forwarder - From Deployment Server DEPLOYMENT-APPS directory
+  hosts: deploymentserver
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Copy ServerClass Config - Deployment Server
-#       copy:
-#         src: ./serverclass_addon
-#         dest: /opt/splunk/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+  tasks:
+    - name: Copy ServerClass Config - Deployment Server
+      copy:
+        src: ./serverclass_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Copy Outputs Config - Deployment Server deployment-apps directory
-#       copy:
-#         src: ./outputs_addon
-#         dest: /opt/splunk/etc/deployment-apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+    - name: Copy Outputs Config - Deployment Server deployment-apps directory
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/deployment-apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Modify outputs.conf to include all indexers
-#       replace:
-#         path: /opt/splunk/etc/deployment-apps/outputs_addon/local/outputs.conf
-#         regexp: "server = .*"
-#         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+    - name: Modify outputs.conf to include all indexers
+      replace:
+        path: /opt/splunk/etc/deployment-apps/outputs_addon/local/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
-#     - name: Apply Deployment Server Bundle Push
-#       shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
+    - name: Apply Deployment Server Bundle Push
+      shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
 
-# ## Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
-# - name: Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
-#   hosts: all:!indexers:!universalforwarder #:!searchheads
-#   become: yes
-#   become_user: splunk_user
+## Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
+- name: Deploy Outputs to all other servers excluding indexers, searchheads, universal forwarders
+  hosts: all:!indexers:!universalforwarder #:!searchheads
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Copy Outputs Config - To all Server
-#       copy:
-#         src: ./outputs_addon
-#         dest: /opt/splunk/etc/apps
-#         owner: splunk_user
-#         group: splunk_user
-#         mode: 0644
+  tasks:
+    - name: Copy Outputs Config - To all Server
+      copy:
+        src: ./outputs_addon
+        dest: /opt/splunk/etc/apps
+        owner: splunk_user
+        group: splunk_user
+        mode: 0644
 
-#     - name: Modify outputs.conf to include all indexers
-#       replace:
-#         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
-#         regexp: "server = .*"
-#         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+    - name: Modify outputs.conf to include all indexers
+      replace:
+        path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
+        regexp: "server = .*"
+        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
-# ## Update server.conf on all other servers excluding universal forwarders
-# - name: Update server.conf on all other servers excluding universal forwarders
-#   hosts: all:!universalforwarder
-#   become: yes
-#   become_user: splunk_user
+## Update server.conf on all other servers excluding universal forwarders
+- name: Update server.conf on all other servers excluding universal forwarders
+  hosts: all:!universalforwarder
+  become: yes
+  become_user: splunk_user
 
-#   tasks:
-#     - name: Delete the line in server.conf that starts with "Pass4SymmKey"
-#       replace:
-#         path: /opt/splunk/etc/system/local/server.conf
-#         regexp: "pass4SymmKey = .*"
-#         replace: "pass4SymmKey = P@ssword123"
-#       # lineinfile:
-#       #   path: /opt/splunk/etc/system/local/server.conf
-#       #   regexp: '^pass4SymmKey\s*=.*$'
-#       #   state: absent
+  tasks:
+    - name: Delete the line in server.conf that starts with "Pass4SymmKey"
+      replace:
+        path: /opt/splunk/etc/system/local/server.conf
+        regexp: "pass4SymmKey = .*"
+        replace: "pass4SymmKey = P@ssword123"
+      # lineinfile:
+      #   path: /opt/splunk/etc/system/local/server.conf
+      #   regexp: '^pass4SymmKey\s*=.*$'
+      #   state: absent
 
-#     - name: Restart Splunkd
-#       shell: sudo systemctl restart Splunkd
+    - name: Restart Splunkd
+      shell: sudo systemctl restart Splunkd
