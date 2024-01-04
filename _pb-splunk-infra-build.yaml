@@ -37,7 +37,7 @@
 
     - name: Set manager_uri in server.conf
       lineinfile:
-        path: /opt/splunk/etc/apps/indexer_addon/default/server.conf
+        path: /opt/splunk/etc/apps/indexer_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
         line: "manager_uri = https://{{ clustermanager }}:8089"
 
@@ -70,7 +70,7 @@
 
     - name: Set manager_uri in server.conf
       lineinfile:
-        path: /opt/splunk/etc/apps/searchhead_addon/default/server.conf
+        path: /opt/splunk/etc/apps/searchhead_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
         line: "manager_uri = https://{{ clustermanager }}:8089"
 
@@ -210,7 +210,7 @@
 
 #     - name: Modify outputs.conf to include all indexers
 #       replace:
-#         path: /opt/splunk/etc/shcluster/apps/outputs_addon/default/outputs.conf
+#         path: /opt/splunk/etc/shcluster/apps/outputs_addon/local/outputs.conf
 #         regexp: "server = .*"
 #         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
@@ -234,7 +234,7 @@
 
 #     - name: Modify deploymentclient to include the Deployment Server
 #       replace:
-#         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/default/deploymentclient.conf
+#         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/local/deploymentclient.conf
 #         regexp: "targetUri = .*"
 #         replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
 
@@ -273,7 +273,7 @@
 
 #     - name: Modify outputs.conf to include all indexers
 #       replace:
-#         path: /opt/splunk/etc/deployment-apps/outputs_addon/default/outputs.conf
+#         path: /opt/splunk/etc/deployment-apps/outputs_addon/local/outputs.conf
 #         regexp: "server = .*"
 #         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
@@ -297,7 +297,7 @@
 
 #     - name: Modify outputs.conf to include all indexers
 #       replace:
-#         path: /opt/splunk/etc/apps/outputs_addon/default/outputs.conf
+#         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
 #         regexp: "server = .*"
 #         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
 
