@@ -312,7 +312,7 @@
     - name: Delete the line in server.conf that starts with "Pass4SymmKey"
       lineinfile:
         path: /opt/splunk/etc/system/local/server.conf
-        regexp: '^Pass4SymmKey\s*=.*$'
+        regexp: '^pass4SymmKey\s*=.*$'
         state: absent
 
     - name: Restart Splunkd
