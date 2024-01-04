@@ -315,5 +315,5 @@
         regexp: '^pass4SymmKey\s*=.*$'
         state: absent
 
-    - name: Restart Splunkd
-      shell: sudo systemctl restart Splunkd
+    # - name: Restart Splunkd
+    #   shell: sudo systemctl restart Splunkd
