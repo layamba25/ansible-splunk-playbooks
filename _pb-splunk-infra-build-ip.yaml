@@ -334,7 +334,7 @@
       replace:
         path: /opt/splunk/etc/deployment-apps/outputs_addon/local/outputs.conf
         regexp: "server = .*"
-        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+        replace: "server = {{ groups['indexers'] | map('extract', hostvars, 'indexer_public_ip') | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Apply Deployment Server Bundle Push
       shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
@@ -358,7 +358,7 @@
       replace:
         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
         regexp: "server = .*"
-        replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+        replace: "server = {{ groups['indexers'] | map('extract', hostvars, 'indexer_public_ip') | map('regex_replace', '$', ':9997') | join(',') }}"
 # - name: Delete file server.conf on all other servers excluding universal forwarders
 #   hosts: all:!universalforwarder
 #   become: yes
