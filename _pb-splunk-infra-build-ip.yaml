@@ -229,17 +229,17 @@
     - name: Assign SH Cluster Captain
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
       # run only on the first search head
-      when: inventory_hostname == groups['searchheads'][0]
+      when: inventory_hostname == groups['searchheads'][1]
       register: bootstrap_task
       ignore_errors: yes
 
     - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
       shell: sudo systemctl stop Splunkd
-      when: bootstrap_task is failed
+      when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
 
     - name: If Assign SH Cluster Captain Fails, do a clean raft
       shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
-      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
+      when: inventory_hostname == groups['searchheads'][1] and bootstrap_task is failed
 
     - name: Start Splunk on all SHs after Clean Raft
       shell: sudo systemctl start Splunkd
@@ -248,7 +248,7 @@
     - name: Assign SH Cluster Captain after Clean Raft
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchhead'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
       # run only on the first search head
-      when: inventory_hostname == groups['searchheads'][0] and bootstrap_task is failed
+      when: inventory_hostname == groups['searchheads'][1] and bootstrap_task is failed
       ignore_errors: yes
 
 ### Search Head Cluster Deployer Push
@@ -295,13 +295,6 @@
         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/local/deploymentclient.conf
         regexp: "targetUri = .*"
         replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
-
-    # - name: Ensure splunk_user owns /opt/splunkforwarder/ directory
-    #   file:
-    #     path: /opt/splunkforwarder/
-    #     owner: splunk_user
-    #     group: splunk_user
-    #     recurse: yes
 
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
@@ -358,6 +351,15 @@
         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('extract', hostvars, 'indexer_public_ip') | map('regex_replace', '$', ':9997') | join(',') }}"
+
+    - name: Restart Splunk
+      shell: sudo systemctl restart Splunkd
+
+    - name: Wait for Splunk to start
+      wait_for:
+        port: 8089
+        delay: 10
+        timeout: 300
 # - name: Delete file server.conf on all other servers excluding universal forwarders
 #   hosts: all:!universalforwarder
 #   become: yes
