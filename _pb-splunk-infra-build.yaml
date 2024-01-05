@@ -43,9 +43,9 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
-    - name: Get public IP of all indexers
+    - name: Get public IP of all indexers in AWS
       set_fact:
-        indexer_public_ip: "{{ ansible_default_ipv4.address }}"
+        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({item: hostvars[item]['ansible_ec2_public_ipv4']}) }}"
       loop: "{{ groups['indexers'] }}"
       run_once: true
 
