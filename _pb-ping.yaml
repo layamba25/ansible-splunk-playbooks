@@ -1,6 +1,6 @@
 ## Indexer Cluster Configuration
 ---
-- name: Restart all Splunk instances
+- name: Ping all Splunk instances
   hosts: all
   gather_facts: false
   become: yes
