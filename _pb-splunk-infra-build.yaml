@@ -59,7 +59,7 @@
 
     - name: Wait for Splunk to start on {{ inventory_hostname }}
       wait_for:
-        port: 8000
+        port: 8089
         delay: 10
         timeout: 300
       ignore_errors: yes
