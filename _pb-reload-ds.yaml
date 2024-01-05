@@ -1,0 +1,9 @@
+## Deploy Outputs to Univesal Forwarder - Deployment Server
+- name: Reloading Deployment Server
+  hosts: deploymentserver
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Apply Deployment Server Bundle Push
+      shell: /opt/splunk/bin/splunk reload deploy-server -auth admin:P@ssword123
