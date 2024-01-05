@@ -320,22 +320,26 @@
         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
-## Update server.conf on all other servers excluding universal forwarders
-# - name: Update server.conf on all other servers excluding universal forwarders
-#   hosts: all:!universalforwarder
-#   become: yes
-#   become_user: splunk_user
 
-#   tasks:
-#     - name: Delete the line in server.conf that starts with "Pass4SymmKey"
-#       replace:
-#         path: /opt/splunk/etc/system/local/server.conf
-#         regexp: "pass4SymmKey = .*"
-#         replace: "pass4SymmKey = P@ssword123"
-#       # lineinfile:
-#       #   path: /opt/splunk/etc/system/local/server.conf
-#       #   regexp: '^pass4SymmKey\s*=.*$'
-#       #   state: absent
+- name: Delete file server.conf on all other servers excluding universal forwarders
+  hosts: all:!universalforwarder
+  become: yes
+  become_user: splunk_user
 
-#     - name: Restart Splunkd
-#       shell: sudo systemctl restart Splunkd
+  tasks:
+    - name: Delete the server.conf in /opt/splunk/etc/system/local
+      file:
+        path: /opt/splunk/etc/system/local/server.conf
+        state: absent
+
+    - name: Stop Splunkd
+      shell: sudo systemctl stop Splunkd
+
+    - name: Start Splunkd
+      shell: sudo systemctl start Splunkd
+
+    - name: Wait for Splunk to start
+      wait_for:
+        port: 8089
+        delay: 10
+        timeout: 300
