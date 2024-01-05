@@ -94,7 +94,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/searchhead_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
-        line: "manager_uri = https://{{ hostvars[groups['clustermanager'][0]].clustermanager_public_ip }}:8089 }}:8089"
+        line: "manager_uri = https://{{ hostvars[groups['clustermanager'][0]].clustermanager_public_ip }}:8089"
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
@@ -126,6 +126,15 @@
   become_user: splunk_user
 
   tasks:
+    - name: Get public IP from external service
+      shell: curl -s http://icanhazip.com
+      register: deployer_public_ip
+      delegate_to: "{{ groups['deployer'][0] }}"
+
+    - name: Set deployer_public_ip fact
+      set_fact:
+        deployer_public_ip: "{{ deployer_public_ip.stdout }}"
+
     - name: Copy SH Cluster Config to the Deployer
       copy:
         src: ./searchhead_clustering/deployer_addon
@@ -158,20 +167,27 @@
         owner: splunk_user
         group: splunk_user
         mode: 0644
-      # run only on the first search head
-      # when: inventory_hostname == groups['searchheads'][0]
+
+    - name: Get public IP from external service
+      shell: curl -s http://icanhazip.com
+      register: searchhead_public_ip
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Set searchhead_public_ip fact
+      set_fact:
+        searchhead_public_ip: "{{ searchhead_public_ip.stdout }}"
 
     - name: Set mgmt_uri in server.conf
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^mgmt_uri\s*=.*$'
-        line: "mgmt_uri = https://{{ inventory_hostname }}:8089"
+        line: "mgmt_uri = https://{{ searchhead_public_ip }}:8089"
 
     - name: Set conf_deploy_fetch_url in server.conf
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^conf_deploy_fetch_url\s*=.*$'
-        line: "conf_deploy_fetch_url = https://{{ deployer }}:8089"
+        line: "conf_deploy_fetch_url = https://{{ deployer_public_ip }}:8089"
 
     - name: Ensure splunk_user owns /opt/splunk/ directory
       file:
