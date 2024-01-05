@@ -46,7 +46,7 @@
     - name: Get public IP of all indexers
       set_fact:
         indexer_public_ip: "{{ ansible_default_ipv4.address }}"
-      # delegate_to: "{{ groups['indexers'] }}"
+      loop: "{{ groups['indexers'] }}"
       run_once: true
 
     - name: Copy Indexers Configs
