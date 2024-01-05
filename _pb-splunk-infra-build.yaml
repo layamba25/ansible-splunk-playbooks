@@ -2,11 +2,17 @@
 ---
 - name: Configure Splunk Infrastructure - Cluster Manager
   hosts: clustermanager
-  gather_facts: false
+  gather_facts: true
   become: yes
   become_user: splunk_user
 
   tasks:
+    - name: Store public IP of clustermanager
+      set_fact:
+        clustermanager_public_ip: "{{ ansible_default_ipv4.address }}"
+      delegate_to: "{{ groups['clustermanager'][0] }}"
+      run_once: true
+
     - name: Copy Cluster Manager Config
       copy:
         src: ./indexer_clustering/cluster_manager_addon
@@ -33,6 +39,12 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
+    - name: Get public IP of all indexers
+      set_fact:
+        indexer_public_ip: "{{ ansible_default_ipv4.address }}"
+      delegate_to: "{{ groups['indexers'] }}"
+      run_once: true
+
     - name: Copy Indexers Configs
       copy:
         src: ./indexer_clustering/indexer_addon
@@ -45,7 +57,8 @@
       lineinfile:
         path: /opt/splunk/etc/apps/indexer_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
-        line: "manager_uri = https://{{ clustermanager }}:8089"
+        # line: "manager_uri = https://{{ clustermanager }}:8089"
+        line: "manager_uri = https://{{ clustermanager_public_ip }}:8089"
 
     - name: Ensure splunk_user owns /opt/splunk/ directory
       file:
