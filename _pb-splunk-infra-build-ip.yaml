@@ -243,6 +243,12 @@
     - name: Start Splunk on all SHs after Clean Raft
       shell: sudo systemctl start Splunkd
 
+    - name: Wait for Splunk to start on
+      wait_for:
+        port: 8089
+        delay: 10
+        timeout: 300
+
     - name: Assign SH Cluster Captain
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
       # run only on the first search head
