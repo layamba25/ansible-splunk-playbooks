@@ -62,6 +62,7 @@
         port: 8000
         delay: 10
         timeout: 300
+      ignore_errors: yes
 
 - name: Configure Splunk Infrastructure - Search Heads
   hosts: searchheads
