@@ -45,6 +45,7 @@
   become_user: splunk_user
   vars:
     clustermanager: "{{ groups['clustermanager'][0] }}"
+    clustermanager_public_ip: clustermanager_public_ip
 
   tasks:
     - name: Copy Indexers Configs
