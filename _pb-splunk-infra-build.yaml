@@ -13,6 +13,10 @@
       delegate_to: "{{ groups['clustermanager'][0] }}"
       run_once: true
 
+    - name: Show public IP of clustermanager
+      debug:
+        msg: "{{ clustermanager_public_ip }}"
+
     - name: Copy Cluster Manager Config
       copy:
         src: ./indexer_clustering/cluster_manager_addon
@@ -42,7 +46,7 @@
     - name: Get public IP of all indexers
       set_fact:
         indexer_public_ip: "{{ ansible_default_ipv4.address }}"
-      delegate_to: "{{ groups['indexers'] }}"
+      # delegate_to: "{{ groups['indexers'] }}"
       run_once: true
 
     - name: Copy Indexers Configs
