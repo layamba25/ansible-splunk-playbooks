@@ -15,7 +15,6 @@
     - name: Set clustermanager_public_ip fact
       set_fact:
         clustermanager_public_ip: "{{ clustermanager_public_ip.stdout }}"
-      delegate_to: "{{ groups['clustermanager'][0] }}"
 
     - name: Display clustermanager_public_ip fact
       debug:
@@ -45,7 +44,6 @@
   become_user: splunk_user
   vars:
     clustermanager: "{{ groups['clustermanager'][0] }}"
-    clustermanager_public_ip: "{{ clustermanager_public_ip }}"
 
   tasks:
     - name: Copy Indexers Configs
@@ -60,7 +58,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/indexer_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
-        line: "manager_uri = https://{{ clustermanager_public_ip }}:8089"
+        line: "manager_uri = https://{{ hostvars[groups['clustermanager'][0]].clustermanager_public_ip }}:8089"
 
     - name: Ensure splunk_user owns /opt/splunk/ directory
       file:
