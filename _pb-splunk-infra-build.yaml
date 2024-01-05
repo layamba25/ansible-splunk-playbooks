@@ -43,7 +43,7 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
-    - name: Get public IP from external service
+    - name: Get public IP of all indexers
       shell: curl -s http://icanhazip.com
       register: public_ip
       delegate_to: "{{ item }}"
@@ -51,10 +51,8 @@
 
     - name: Set fact for public IPs
       set_fact:
-        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({item: public_ip.stdout}) }}"
+        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({item: public_ip.results | json_query('[?item==`' + item + '`].stdout | [0]') }) }}"
       loop: "{{ groups['indexers'] }}"
-      loop_control:
-        loop_var: item
 
     - name: Copy Indexers Configs
       copy:
