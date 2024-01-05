@@ -256,6 +256,12 @@
       register: bootstrap_task
       ignore_errors: yes
 
+    - name: Wait for Splunk to start on
+      wait_for:
+        port: 8089
+        delay: 10
+        timeout: 300
+
     # - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
     #   shell: sudo systemctl stop Splunkd
 
