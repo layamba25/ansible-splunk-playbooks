@@ -51,6 +51,10 @@
       set_fact:
         indexer_public_ip: "{{ indexer_public_ip.stdout }}"
 
+    - name: Show indexer_public_ip fact
+      debug:
+        var: indexer_public_ip
+
     - name: Copy Indexers Configs
       copy:
         src: ./indexer_clustering/indexer_addon
