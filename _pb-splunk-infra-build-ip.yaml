@@ -7,7 +7,7 @@
   become_user: splunk_user
 
   tasks:
-    - name: Get public IP from external service
+    - name: Get Cluster Manager public IP from external service
       shell: curl -s http://icanhazip.com
       register: clustermanager_public_ip
       delegate_to: "{{ groups['clustermanager'][0] }}"
@@ -42,10 +42,14 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
-    - name: Get public IP from external service
+    - name: Get Indexers public IP from external service
       shell: curl -s http://icanhazip.com
       register: indexer_public_ip
       delegate_to: "{{ inventory_hostname }}"
+
+    - name: Set indexer_public_ip fact as a list
+      set_fact:
+        indexer_public_ip: "{{ indexer_public_ip.stdout }}"
 
     - name: Copy Indexers Configs
       copy:
@@ -350,26 +354,25 @@
         path: /opt/splunk/etc/apps/outputs_addon/local/outputs.conf
         regexp: "server = .*"
         replace: "server = {{ groups['indexers'] | map('regex_replace', '$', ':9997') | join(',') }}"
+# - name: Delete file server.conf on all other servers excluding universal forwarders
+#   hosts: all:!universalforwarder
+#   become: yes
+#   become_user: splunk_user
 
-- name: Delete file server.conf on all other servers excluding universal forwarders
-  hosts: all:!universalforwarder
-  become: yes
-  become_user: splunk_user
+#   tasks:
+#     - name: Delete the server.conf in /opt/splunk/etc/system/local
+#       file:
+#         path: /opt/splunk/etc/system/local/server.conf
+#         state: absent
 
-  tasks:
-    - name: Delete the server.conf in /opt/splunk/etc/system/local
-      file:
-        path: /opt/splunk/etc/system/local/server.conf
-        state: absent
+#     - name: Stop Splunkd
+#       shell: sudo systemctl stop Splunkd
 
-    - name: Stop Splunkd
-      shell: sudo systemctl stop Splunkd
+#     - name: Start Splunkd
+#       shell: sudo systemctl start Splunkd
 
-    - name: Start Splunkd
-      shell: sudo systemctl start Splunkd
-
-    - name: Wait for Splunk to start
-      wait_for:
-        port: 8089
-        delay: 10
-        timeout: 300
+#     - name: Wait for Splunk to start
+#       wait_for:
+#         port: 8089
+#         delay: 10
+#         timeout: 300
