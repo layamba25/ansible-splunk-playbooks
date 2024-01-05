@@ -42,6 +42,11 @@
     clustermanager: "{{ groups['clustermanager'][0] }}"
 
   tasks:
+    - name: Get public IP from external service
+      shell: curl -s http://icanhazip.com
+      register: indexer_public_ip
+      delegate_to: "{{ inventory_hostname }}"
+
     - name: Copy Indexers Configs
       copy:
         src: ./indexer_clustering/indexer_addon
@@ -187,7 +192,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/sh_cluster_addon/local/server.conf
         regexp: '^conf_deploy_fetch_url\s*=.*$'
-        line: "conf_deploy_fetch_url = https://{{ deployer_public_ip }}:8089"
+        line: "conf_deploy_fetch_url = https://{{ hostvars[groups['deployer'][0]].deployer_public_ip  }}:8089"
 
     - name: Ensure splunk_user owns /opt/splunk/ directory
       file:
