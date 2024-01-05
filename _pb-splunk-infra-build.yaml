@@ -7,10 +7,10 @@
   become_user: splunk_user
 
   tasks:
-    - name: Store public IP of clustermanager
+    - name: Get public IP of all indexers
       set_fact:
-        clustermanager_public_ip: "{{ ansible_default_ipv4.address }}"
-      delegate_to: "{{ groups['clustermanager'][0] }}"
+        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({item: hostvars[item]['ansible_default_ipv4']['address']}) }}"
+      loop: "{{ groups['indexers'] }}"
       run_once: true
 
     - name: Show public IP of clustermanager
