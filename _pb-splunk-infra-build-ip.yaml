@@ -16,10 +16,6 @@
       set_fact:
         clustermanager_public_ip: "{{ clustermanager_public_ip.stdout }}"
 
-    - name: Display clustermanager_public_ip fact
-      debug:
-        var: clustermanager_public_ip
-
     - name: Copy Cluster Manager Config
       copy:
         src: ./indexer_clustering/cluster_manager_addon
@@ -98,7 +94,7 @@
       lineinfile:
         path: /opt/splunk/etc/apps/searchhead_addon/local/server.conf
         regexp: '^manager_uri\s*=.*$'
-        line: "manager_uri = https://{{ clustermanager }}:8089"
+        line: "manager_uri = https://{{ hostvars[groups['clustermanager'][0]].clustermanager_public_ip }}:8089 }}:8089"
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
