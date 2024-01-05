@@ -299,6 +299,24 @@
       shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ hostvars[groups['searchheads'][1]]['searchhead_public_ip'] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
       ignore_errors: yes
 
+## Get Deployment Server Public IP
+- name: Get Deployment Server Public IP
+  hosts: deploymentserver
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name: Get public IP from external service
+      shell: curl -s http://icanhazip.com
+      register: deploymentserver_public_ip
+      delegate_to: "{{ groups['deploymentserver'][0] }}"
+      ignore_errors: yes
+
+    - name: Set deploymentserver_public_ip fact
+      set_fact:
+        deploymentserver_public_ip: "{{ deploymentserver_public_ip.stdout }}"
+      ignore_errors: yes
+
 ## Configure Universal Forwarders
 - name: Configure Universal Forwarders
   hosts: universalforwarder
@@ -317,7 +335,7 @@
       replace:
         path: /opt/splunkforwarder/etc/apps/TA_deploymentclient/local/deploymentclient.conf
         regexp: "targetUri = .*"
-        replace: "targetUri = {{ groups['deploymentserver'] | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}"
+        replace: "targetUri = {{ hostvars[groups['deploymentserver'][0]].deploymentserver_public_ip }}:8089"
 
     - name: Restart Splunk
       shell: /opt/splunkforwarder/bin/splunk restart
