@@ -227,7 +227,7 @@
         timeout: 300
 
     - name: Assign SH Cluster Captain
-      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchhead'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
+      shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchheads'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
       # run only on the first search head
       when: inventory_hostname == groups['searchheads'][0]
       register: bootstrap_task
@@ -274,7 +274,6 @@
 
     - name: Push Outputs Cluster Config to Search Heads
       shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ hostvars[groups['searchheads'][0]]['searchhead_public_ip'] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
-
       ignore_errors: yes
 
 ## Configure Universal Forwarders
