@@ -1,0 +1,11 @@
+## Indexer Cluster Configuration
+---
+- name: Restart all Splunk instances
+  hosts: all
+  gather_facts: false
+  become: yes
+  become_user: splunk_user
+
+  tasks:
+    - name:
+      ping:
