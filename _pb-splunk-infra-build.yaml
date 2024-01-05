@@ -51,8 +51,10 @@
 
     - name: Set fact for public IPs
       set_fact:
-        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({item: public_ip.results | json_query('[?item==`' + item + '`].stdout | [0]') }) }}"
-      loop: "{{ groups['indexers'] }}"
+        indexer_public_ips: "{{ indexer_public_ips | default({}) | combine({ item: public_ip_item.stdout }) }}"
+      loop: "{{ public_ip.results }}"
+      loop_control:
+        loop_var: public_ip_item
 
     - name: Copy Indexers Configs
       copy:
