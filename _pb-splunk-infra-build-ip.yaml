@@ -11,7 +11,7 @@
       shell: curl -s http://icanhazip.com
       register: clustermanager_public_ip
       delegate_to: "{{ groups['clustermanager'][0] }}"
-      warn: false
+
     - name: Set clustermanager_public_ip fact
       set_fact:
         clustermanager_public_ip: "{{ clustermanager_public_ip.stdout }}"
