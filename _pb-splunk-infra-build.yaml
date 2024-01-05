@@ -18,7 +18,7 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
-    - name: Wait for Splunk to restart on {{ inventory_hostname }}
+    - name: Wait for Splunk to start on {{ inventory_hostname }}
       wait_for:
         port: 8000
         delay: 10
@@ -57,7 +57,7 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
-    - name: Wait for Splunk to restart on {{ inventory_hostname }}
+    - name: Wait for Splunk to start on {{ inventory_hostname }}
       wait_for:
         port: 8000
         delay: 10
@@ -127,7 +127,7 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
-    - name: Wait for Splunk to restart on {{ inventory_hostname }}
+    - name: Wait for Splunk to start on {{ inventory_hostname }}
       wait_for:
         port: 8000
         delay: 10
@@ -181,7 +181,7 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
-    - name: Wait for Splunk to restart on {{ inventory_hostname }}
+    - name: Wait for Splunk to start on {{ inventory_hostname }}
       wait_for:
         port: 8000
         delay: 10
