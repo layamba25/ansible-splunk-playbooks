@@ -235,7 +235,6 @@
 
     - name: If Assign SH Cluster Captain Fails, Stop Splunk on all SHs
       shell: sudo systemctl stop Splunkd
-      when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
 
     - name: If Assign SH Cluster Captain Fails, do a clean raft
       shell: /opt/splunk/bin/splunk clean raft -auth admin:P@ssword123 --answer-yes
@@ -243,7 +242,6 @@
 
     - name: Start Splunk on all SHs after Clean Raft
       shell: sudo systemctl start Splunkd
-      when: bootstrap_task is failed and inventory_hostname == groups['searchheads']
 
     - name: Assign SH Cluster Captain after Clean Raft
       shell: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "{{ groups['searchhead'] | map('extract', hostvars, 'searchhead_public_ip') | map('regex_replace', '^', 'https://') | map('regex_replace', '$', ':8089') | join(',') }}" -auth admin:P@ssword123
