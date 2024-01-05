@@ -209,13 +209,13 @@
         group: splunk_user
         recurse: yes
 
-    - name: Enable web.conf SSL on all SHs - Search Heads
-      copy:
-        src: ./searchhead_clustering/web_ssl_addon
-        dest: /opt/splunk/etc/apps
-        owner: splunk_user
-        group: splunk_user
-        mode: 0644
+    # - name: Enable web.conf SSL on all SHs - Search Heads
+    #   copy:
+    #     src: ./searchhead_clustering/web_ssl_addon
+    #     dest: /opt/splunk/etc/apps
+    #     owner: splunk_user
+    #     group: splunk_user
+    #     mode: 0644
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
@@ -290,7 +290,7 @@
         replace: "server = {{ groups['indexers'] | map('extract', hostvars, 'indexer_public_ip') | map('regex_replace', '$', ':9997') | join(',') }}"
 
     - name: Push Outputs Cluster Config to Search Heads
-      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ hostvars[groups['searchheads'][0]]['searchhead_public_ip'] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
+      shell: /opt/splunk/bin/splunk apply shcluster-bundle -target https://{{ hostvars[groups['searchheads'][1]]['searchhead_public_ip'] }}:8089 -auth admin:P@ssword123 --preserve-lookups true --answer-yes
       ignore_errors: yes
 
 ## Configure Universal Forwarders
