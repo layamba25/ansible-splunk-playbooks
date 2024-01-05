@@ -18,6 +18,12 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
+    - name: Wait for Splunk to restart
+      wait_for:
+        port: 8000
+        delay: 10
+        timeout: 300
+
 - name: Configure Splunk Infrastructure - Indexers
   hosts: indexers
   gather_facts: false
@@ -51,6 +57,12 @@
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
 
+    - name: Wait for Splunk to restart
+      wait_for:
+        port: 8000
+        delay: 10
+        timeout: 300
+
 - name: Configure Splunk Infrastructure - Search Heads
   hosts: searchheads
   gather_facts: false
@@ -76,6 +88,7 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
+
 ### Cluster Manager manager-apps directory Deployment
 - name: Configure Splunk Infrastructure
   hosts: clustermanager
@@ -113,6 +126,12 @@
 
     - name: Restart Splunk
       shell: sudo systemctl restart Splunkd
+
+    - name: Wait for Splunk to restart
+      wait_for:
+        port: 8000
+        delay: 10
+        timeout: 300
 
 - name: Copy SH Cluster Config to the Search Heads
   hosts: searchheads
