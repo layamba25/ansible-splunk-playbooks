@@ -4,7 +4,7 @@
   hosts: splunk_test01
   gather_facts: false
   become: yes
-  become_user: splunk_user
+  #become_user: splunk_user
 
   tasks:
     - name:
