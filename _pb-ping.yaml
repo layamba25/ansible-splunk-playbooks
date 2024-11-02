@@ -1,7 +1,7 @@
 ## Indexer Cluster Configuration
 ---
 - name: Ping all Splunk instances
-  hosts: splunk_test01
+  hosts: hf
   gather_facts: false
   #become: yes
   #become_user: splunk_user
